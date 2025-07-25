@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <fstream>
 using std::cin;
 using std::cout;
 using std::endl;
@@ -57,7 +58,36 @@ public:
 	{
 		cout << last_name << " " << first_name << " " << age << endl;
 	}
+
+	virtual std::ostream& out(std::ostream& os)const
+	{
+		cout << last_name << " " << first_name << " " << age;
+		return os;
+	}
+
+	virtual void InFile(std::ofstream& fout)const
+	{
+		fout << last_name << " " << first_name << " " << age;
+	}
+
+	//Не закончено (применительно к READ_FROM_FILE
+	/*virtual void FromFile(std::ifstream& fin, char sz_buffer[])
+	{
+		const char delimiters[] = { ' ' };
+		char parameters[3] = {};
+		int n = 0;
+		for (char* pch = strtok(sz_buffer, delimiters); pch && n < 3; pch = strtok(NULL, delimiters))
+			parameters[n++] = *pch;
+		this->last_name = parameters[0];
+		this->first_name = parameters[1];
+		this->age = atoi(parameters[2]);
+	}*/
 };
+
+std::ostream& operator<<(std::ostream& os, const Human& human)
+{
+	return human.out(os);
+}
 
 #define STUDENT_TAKE_PARAMETERS const std::string& speciality, const std::string& group, double rating, double attendance
 #define STUDENT_GIVE_PARAMETERS speciality, group, rating, attendance
@@ -127,7 +157,25 @@ public:
 		Human::info();
 		cout << speciality << " " << group << " " << rating << " " << attendance << endl;
 	}
+
+	std::ostream& out(std::ostream& os)const override
+	{
+		Human::out(os); cout << endl;
+		cout << speciality << " " << group << " " << rating << " " << attendance;
+		return os;
+	}
+
+	void InFile(std::ofstream& fout)const override
+	{
+		Human::InFile(fout); fout << endl;
+		fout << speciality << " " << group << " " << rating << " " << attendance;
+	}
 };
+
+std::ostream& operator<<(std::ostream& os, const Student& student)
+{
+	return student.out(os);
+}
 
 #define TEACHER_TAKE_PARAMETERS const std::string& speciality, int experience
 #define TEACHER_GIVE_PARAMETERS speciality, experience
@@ -176,7 +224,25 @@ public:
 		Human::info();
 		cout << speciality << " " << experience << endl;
 	}
+
+	std::ostream& out(std::ostream& os)const override
+	{
+		Human::out(os); cout << endl;
+		cout << speciality << " " << experience;
+		return os;
+	}
+
+	void InFile(std::ofstream& fout)const override
+	{
+		Human::InFile(fout); fout << endl;
+		fout << speciality << " " << experience;
+	}
 };
+
+std::ostream& operator<<(std::ostream& os, const Teacher& teacher)
+{
+	return teacher.out(os);
+}
 
 class Graduate : public Student
 {
@@ -205,10 +271,37 @@ public:
 		Student::info();
 		cout << subject << endl;
 	}
+
+	std::ostream& out(std::ostream& os) const override
+	{
+		Student::out(os); cout << endl;
+		cout << subject;
+		return os;
+	}
+
+	void InFile(std::ofstream& fout)const override
+	{
+		Student::InFile(fout); fout << endl;
+		fout << subject;
+	}
 };
 
+std::ostream& operator<<(std::ostream& os, const Graduate& graduate)
+{
+	return graduate.out(os);
+}
+
+std::ofstream& operator<<(std::ofstream& ofs, const Human* group)
+{
+	group->InFile(ofs);
+	return ofs;
+}
+
 //#define INHERITANCE
-#define POLYMORPHISM
+//#define POLYMORPHISM
+#define OSTFREAM_OPERATOR
+//#define WRITE_TO_FILE
+//#define READ_FROM_FILE		//Не закончено
 
 void main()
 {
@@ -228,6 +321,7 @@ void main()
 	graduate.info();
 #endif // INHERITANCE
 
+#ifdef POLYMORPHISM
 	Human* group[] =
 	{
 		//приведение дочернего объекта к базовому типу называют Upcast
@@ -238,13 +332,99 @@ void main()
 		new Student("Vercetty", "Tommy", 30, "Theft", "Vice", 98, 99),
 		new Teacher("Diaz", "Ricardo", 50, "Weapons distribution", 20)
 	};
-	for (int i = 0; i < sizeof(group)/sizeof(group[0]); i++)
+	for (int i = 0; i < sizeof(group) / sizeof(group[0]); i++)
 	{
 		group[i]->info();
 		cout << delimiter << endl;
 	}
-	for (int i = 0; i < sizeof(group)/sizeof(group[0]); i++)
+	for (int i = 0; i < sizeof(group) / sizeof(group[0]); i++)
 	{
 		delete group[i];
 	}
+#endif // POLYMORPHISM
+
+#ifdef OSTFREAM_OPERATOR
+	Human human("Montana", "Antonio", 25);
+	cout << human << endl;
+
+	Student student("Pinkman", "Jessie", 22, "Chemistry", "WW_220", 95, 99);
+	cout << student << endl;
+
+	Teacher teacher("White", "Walter", 50, "Chemistry", 25);
+	cout << teacher << endl;
+
+	Graduate graduate("Schreder", "Hank", 40, "Criminalistic", "WW_220", 40, 60, "How to catch Heisenberg");
+	cout << graduate << endl;
+#endif // OSTFREAM_OPERATOR
+
+#ifdef WRITE_TO_FILE
+	Human* group[] =
+	{
+		new Human("Montana", "Antonio", 25),
+		new Student("Pinkman", "Jessie", 22, "Chemistry", "WW_220", 95, 99),
+		new Teacher("White", "Walter", 50, "Chemistry", 25),
+		new Graduate("Schreder", "Hank", 40, "Criminalistic", "WW_220", 40, 60, "How to catch Heisenberg"),
+		new Student("Vercetty", "Tommy", 30, "Theft", "Vice", 98, 99),
+		new Teacher("Diaz", "Ricardo", 50, "Weapons distribution", 20)
+	};
+
+	std::ofstream fout;
+	fout.open("group.txt");
+	for (int i = 0; i < sizeof(group) / sizeof(group[0]); i++)
+	{
+		fout << group[i] << endl;
+		fout << delimiter << endl;
+	}
+	fout.close();
+	system("notepad group.txt");
+
+	for (int i = 0; i < sizeof(group) / sizeof(group[0]); i++)
+	{
+		delete group[i];
+	}
+#endif // WRITE_TO_FILE
+
+//Не закончено
+#ifdef READ_FROM_FILE
+	std::ifstream fin("group.txt");
+	if (fin.is_open())
+	{
+		const int QUANTITY = 30;
+		const int ROWS_IN_FILE = 5 * 30;
+		const int COLS = 3;
+		std::string temp[QUANTITY][COLS] = {};
+		int RowsInMembers[QUANTITY] = {};
+		//char* temp = new char[SIZE_GROUP] {};
+		int number = 0;
+		while (!fin.eof())
+		{
+			const int SIZE = 256;
+			char sz_buffer[SIZE] = {};
+			fin.getline(sz_buffer, SIZE);
+			int i = 0;
+			/*while (sz_buffer != delimiter || sz_buffer != 0)
+			{
+				temp[number][i++] = sz_buffer;
+			}
+				RowsInMembers[number] = i;*/
+
+			if (sz_buffer != delimiter || sz_buffer != 0)
+			{
+				temp[number][i] = sz_buffer;
+				RowsInMembers[number] = i;
+			}
+			else break;
+		}
+		fin.close();
+		cout << number << endl;
+		for (int i = 0; i < number; i++)
+			cout << &temp[i] << endl;
+		delete[] temp;
+	}
+	else
+	{
+		std::cerr << "Error: file not found" << endl;
+	}
+#endif // READ_FROM_FILE
+
 }
