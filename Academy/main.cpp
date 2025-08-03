@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <fstream>
+#include <string>
 using std::cin;
 using std::cout;
 using std::endl;
@@ -80,6 +81,10 @@ public:
 		os << age;
 		return os;
 	}
+	virtual std::istream& scan(std::istream& is)
+	{
+		return is >> last_name >> first_name >> age;
+	}
 };
 //Static member definition
 int Human::count = 0;		//Статические переменные класса инициализируют вне класса
@@ -88,6 +93,11 @@ std::ostream& operator<<(std::ostream& os, const Human& obj)
 {
 	return obj.info(os);
 	//return os << obj.get_last_name() << " " << obj.get_first_name() << " " << obj.get_age();
+}
+
+std::istream& operator>>(std::istream& is, Human& obj)
+{
+	return obj.scan(is);
 }
 
 #define STUDENT_TAKE_PARAMETERS const std::string& speciality, const std::string& group, double rating, double attendance
@@ -171,6 +181,24 @@ public:
 		os << attendance;
 		return os;
 	}
+
+	std::istream& scan(std::istream& is)override
+	{
+		//return Human::scan(is) >> speciality >> group >> rating >> attendance;
+		Human::scan(is);
+		char buffer[SPECIALITY_WIDTH + 1]{};
+		is.read(buffer, SPECIALITY_WIDTH);
+		int i = 0;
+		while (buffer[i] == ' ')
+		{
+			for (int j = 0; j < SPECIALITY_WIDTH + 1; j++)
+				buffer[j] = buffer[j + 1];
+			i++;
+		}
+		speciality = buffer;
+		is >> group >> rating >> attendance;
+		return is;
+	}
 };
 
 #define TEACHER_TAKE_PARAMETERS const std::string& speciality, int experience
@@ -228,6 +256,23 @@ public:
 		os << experience;
 		return os;
 	}
+	std::istream& scan(std::istream& is)override
+	{
+		//return Human::scan(is) >> speciality >> experience;
+		Human::scan(is);
+		char buffer[SPECIALITY_WIDTH + 1]{};
+		is.read(buffer, SPECIALITY_WIDTH);
+		int i = 0;
+		while (buffer[i] == ' ')
+		{
+			for (int j = 0; j < SPECIALITY_WIDTH + 1; j++)
+				buffer[j] = buffer[j + 1];
+			i++;
+		}
+		speciality = buffer;
+		is >> experience;
+		return is;
+	}
 };
 
 class Graduate : public Student
@@ -252,34 +297,88 @@ public:
 	{
 		cout << "GDestructor:\t" << this << endl;
 	}
+	//Methods
 	std::ostream& info(std::ostream& os)const override
 	{
 		Student::info(os) << " ";
 		return os << subject;
+	}
+	std::istream& scan(std::istream& is)override
+	{
+		return std::getline(Student::scan(is), subject);
 	}
 };
 
 void Print(Human* group[], const int n)
 {
 	cout << typeid(group).name() << endl;
+	cout << delimiter << endl;
 	for (int i = 0; i < n; i++)
 	{
 		cout << *group[i] << endl;
-		//cout << delimiter << endl;
 	}
+	cout << delimiter << endl;
 	cout << "Количество людей: " << Human::get_count() << endl;
 }
-void Save(Human** group)
+void Save(Human** group, const int n, const char filename[])
 {
-	char filename[] = "group.txt";
 	std::ofstream fout(filename);
-	for (int i = 0; i < sizeof(group) / sizeof(group[0]); i++)
+	for (int i = 0; i < n; i++)
 	{
 		fout << *group[i] << endl;
-		cout << delimiter << endl;
 	}
 	fout.close();
 	system((std::string("start notepad ") + filename).c_str());
+}
+
+Human* HumanFactory(std::string& type)
+{
+	Human* human = nullptr;
+	//if (type[0] == '\n')type = type.c_str() + 1;
+	if (strstr(type.c_str(), "Human")) human = new Human("", "", 0);
+	if (strstr(type.c_str(), "Student")) human = new Student("", "", 0, "", "", 0, 0);
+	if (strstr(type.c_str(), "Graduate")) human = new Graduate("", "", 0, "", "", 0, 0, "");
+	if (strstr(type.c_str(), "Teacher")) human = new Teacher("", "", 0, "", 0);
+	return human;
+}
+
+Human** Load(const char filename[])
+{
+	int n = 0;		//количнство объектов, хранящихся в файле
+	Human** group = nullptr;
+	std::ifstream fin(filename);
+	if (fin.is_open())
+	{
+		//1) Посчитать количество объектов в файле для того, чтобы выделить память:
+		std::string buffer;
+		while (!fin.eof())
+		{
+			std::getline(fin, buffer);
+			if (buffer.size() == 0) continue;
+			//break - прерывает текущую итерацию, и все последующие;
+			//continue - прерывает текущую итерацию и переходит к следующей;
+			n++;
+		}
+		cout << "File position: " << fin.tellg() << endl;;
+		cout << "Количество объектов: " << n << endl;
+		//2) Выделяем память под массив объектоа:
+		group = new Human * [n] {};
+		//3) Возвращаемся в начало файла для того, чтобы считать объекты:
+		fin.clear();
+		fin.seekg(0);
+		cout << "File position: " << fin.tellg() << endl;
+		//4) Считываем объекты из файла:
+		for (int i = 0; i < n; i++)
+		{
+			std::getline(fin, buffer, ':');
+			cout << buffer << endl;
+			group[i] = HumanFactory(buffer);
+			//std::getline(fin, buffer);
+			fin >> *group[i];
+		}
+	}
+	fin.close();
+	return group;
 }
 
 void Clear(Human** group, const int n)
@@ -292,6 +391,7 @@ void Clear(Human** group, const int n)
 
 //#define INHERITANCE
 //#define POLYMORPHISM
+//#define WRITE_TO_FILE
 
 void main()
 {
@@ -345,6 +445,7 @@ void main()
 	cout << "Количество людей: " << Human::get_count() << endl;
 #endif // POLYMORPHISM
 
+#ifdef WRITE_TO_FILE
 	Human* group[] =
 	{
 		new Human("Montana", "Antonio", 25),
@@ -358,6 +459,12 @@ void main()
 	};
 	cout << typeid(group).name() << endl;
 	Print(group, sizeof(group) / sizeof(group[0]));
+	Save(group, sizeof(group) / sizeof(group[0]), "group.txt");
 	Clear(group, sizeof(group) / sizeof(group[0]));
+#endif // WRITE_TO_FILE
+
+	Human** group = Load("group.txt");
+	cout << "\n==========================================================\n" << endl;
+	Print(group, 8);
 
 }
