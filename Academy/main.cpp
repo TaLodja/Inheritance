@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <fstream>
 using std::cin;
 using std::cout;
 using std::endl;
@@ -10,7 +11,8 @@ using std::endl;
 
 class Human
 {
-	static const int LAST_NAME_WIDTH = 15;
+	static const int TYPE_WIDTH = 10;
+	static const int LAST_NAME_WIDTH = 16;
 	static const int FIRST_NAME_WIDTH = 15;
 	static const int AGE_WIDTH = 3;
 	static int count;			//Static member declaration
@@ -66,8 +68,11 @@ public:
 	virtual std::ostream& info(std::ostream& os)const
 	{
 		//return os << last_name << " " << first_name << " " << age;
-		os.width(LAST_NAME_WIDTH);
+		os.width(TYPE_WIDTH);
 		os<<std::left;
+		//os << strchr(typeid(*this).name(), ' ')+1 << ":";
+		os << std::string(typeid(*this).name()+6) + ":";	//убираем из строки слово 'class'
+		os.width(LAST_NAME_WIDTH);
 		os << last_name;
 		os.width(FIRST_NAME_WIDTH);
 		os << first_name;
@@ -285,14 +290,21 @@ void main()
 		new Student("Vercetty", "Tommy", 30, "Theft", "Vice", 98, 99),
 		new Teacher("Diaz", "Ricardo", 50, "Weapons distribution", 20),
 		new Graduate("Targarian", "Daineris", 22, "Flight", "GoT", 91, 92, "How to make smoke"),
-		new Teacher("Schwartzneger", "Arnold", 85, "HeavyMetal", 60)
+		new Teacher("Schwartzenegger", "Arnold", 85, "HeavyMetal", 60)
 	};
+	char filename[] = "group.txt";
+	std::ofstream fout(filename);
 	for (int i = 0; i < sizeof(group)/sizeof(group[0]); i++)
 	{
 		//group[i]->info();
 		cout << *group[i] << endl;
+		fout << *group[i] << endl;
 		cout << delimiter << endl;
 	}
+	fout.close();
+	//char cmd[FILENAME_MAX] = "notepad ";
+	//system(strcat(cmd, filename));
+	system((std::string("start notepad ") + filename).c_str());
 	cout << "Количество людей: " << group[0]->get_count() << endl;
 	for (int i = 0; i < sizeof(group)/sizeof(group[0]); i++)
 	{
