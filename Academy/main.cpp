@@ -21,9 +21,9 @@ class Human
 	int age;
 public:
 	static int get_count()
-		{
-			return count;
-		}
+	{
+		return count;
+	}
 	const std::string& get_last_name()const
 	{
 		return last_name;
@@ -69,9 +69,9 @@ public:
 	{
 		//return os << last_name << " " << first_name << " " << age;
 		os.width(TYPE_WIDTH);
-		os<<std::left;
+		os << std::left;
 		//os << strchr(typeid(*this).name(), ' ')+1 << ":";
-		os << std::string(typeid(*this).name()+6) + ":";	//убираем из строки слово 'class'
+		os << std::string(typeid(*this).name() + 6) + ":";	//убираем из строки слово 'class'
 		os.width(LAST_NAME_WIDTH);
 		os << last_name;
 		os.width(FIRST_NAME_WIDTH);
@@ -259,8 +259,39 @@ public:
 	}
 };
 
+void Print(Human* group[], const int n)
+{
+	cout << typeid(group).name() << endl;
+	for (int i = 0; i < n; i++)
+	{
+		cout << *group[i] << endl;
+		//cout << delimiter << endl;
+	}
+	cout << "Количество людей: " << Human::get_count() << endl;
+}
+void Save(Human** group)
+{
+	char filename[] = "group.txt";
+	std::ofstream fout(filename);
+	for (int i = 0; i < sizeof(group) / sizeof(group[0]); i++)
+	{
+		fout << *group[i] << endl;
+		cout << delimiter << endl;
+	}
+	fout.close();
+	system((std::string("start notepad ") + filename).c_str());
+}
+
+void Clear(Human** group, const int n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		delete group[i];
+	}
+}
+
 //#define INHERITANCE
-#define POLYMORPHISM
+//#define POLYMORPHISM
 
 void main()
 {
@@ -280,6 +311,7 @@ void main()
 	graduate.info();
 #endif // INHERITANCE
 
+#ifdef POLYMORPHISM
 	Human* group[] =
 	{
 		//приведение дочернего объекта к базовому типу называют Upcast
@@ -294,7 +326,7 @@ void main()
 	};
 	char filename[] = "group.txt";
 	std::ofstream fout(filename);
-	for (int i = 0; i < sizeof(group)/sizeof(group[0]); i++)
+	for (int i = 0; i < sizeof(group) / sizeof(group[0]); i++)
 	{
 		//group[i]->info();
 		cout << *group[i] << endl;
@@ -306,9 +338,26 @@ void main()
 	//system(strcat(cmd, filename));
 	system((std::string("start notepad ") + filename).c_str());
 	cout << "Количество людей: " << group[0]->get_count() << endl;
-	for (int i = 0; i < sizeof(group)/sizeof(group[0]); i++)
+	for (int i = 0; i < sizeof(group) / sizeof(group[0]); i++)
 	{
 		delete group[i];
 	}
 	cout << "Количество людей: " << Human::get_count() << endl;
+#endif // POLYMORPHISM
+
+	Human* group[] =
+	{
+		new Human("Montana", "Antonio", 25),
+		new Student("Pinkman", "Jessie", 22, "Chemistry", "WW_220", 95, 99),
+		new Teacher("White", "Walter", 50, "Chemistry", 25),
+		new Graduate("Schreder", "Hank", 40, "Criminalistic", "WW_220", 40, 60, "How to catch Heisenberg"),
+		new Student("Vercetty", "Tommy", 30, "Theft", "Vice", 98, 99),
+		new Teacher("Diaz", "Ricardo", 50, "Weapons distribution", 20),
+		new Graduate("Targarian", "Daineris", 22, "Flight", "GoT", 91, 92, "How to make smoke"),
+		new Teacher("Schwartzenegger", "Arnold", 85, "HeavyMetal", 60)
+	};
+	cout << typeid(group).name() << endl;
+	Print(group, sizeof(group) / sizeof(group[0]));
+	Clear(group, sizeof(group) / sizeof(group[0]));
+
 }
