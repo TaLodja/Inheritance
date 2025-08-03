@@ -172,10 +172,10 @@ public:
 	}
 };
 
-std::ostream& operator<<(std::ostream& os, const Student& student)
-{
-	return student.out(os);
-}
+//std::ostream& operator<<(std::ostream& os, const Student& student)
+//{
+//	return student.out(os);
+//}
 
 #define TEACHER_TAKE_PARAMETERS const std::string& speciality, int experience
 #define TEACHER_GIVE_PARAMETERS speciality, experience
@@ -239,10 +239,10 @@ public:
 	}
 };
 
-std::ostream& operator<<(std::ostream& os, const Teacher& teacher)
-{
-	return teacher.out(os);
-}
+//std::ostream& operator<<(std::ostream& os, const Teacher& teacher)
+//{
+//	return teacher.out(os);
+//}
 
 class Graduate : public Student
 {
@@ -286,10 +286,10 @@ public:
 	}
 };
 
-std::ostream& operator<<(std::ostream& os, const Graduate& graduate)
-{
-	return graduate.out(os);
-}
+//std::ostream& operator<<(std::ostream& os, const Graduate& graduate)
+//{
+//	return graduate.out(os);
+//}
 
 std::ofstream& operator<<(std::ofstream& ofs, const Human* group)
 {
@@ -299,8 +299,8 @@ std::ofstream& operator<<(std::ofstream& ofs, const Human* group)
 
 //#define INHERITANCE
 //#define POLYMORPHISM
-#define OSTFREAM_OPERATOR
-//#define WRITE_TO_FILE
+//#define OSTFREAM_OPERATOR
+#define WRITE_TO_FILE
 //#define READ_FROM_FILE		//Не закончено
 
 void main()
