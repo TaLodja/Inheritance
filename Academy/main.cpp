@@ -7,6 +7,8 @@ using std::endl;
 
 #define delimiter "\n--------------------------------------\n"
 
+void speciality_left(char* buffer, const int n);
+
 #define HUMAN_TAKE_PARAMETERS const std::string& last_name, const std::string& first_name, int age
 #define HUMAN_GIVE_PARAMETERS last_name, first_name, age
 
@@ -188,13 +190,7 @@ public:
 		Human::scan(is);
 		char buffer[SPECIALITY_WIDTH + 1]{};
 		is.read(buffer, SPECIALITY_WIDTH);
-		int i = 0;
-		while (buffer[i] == ' ')
-		{
-			for (int j = 0; j < SPECIALITY_WIDTH + 1; j++)
-				buffer[j] = buffer[j + 1];
-			i++;
-		}
+		speciality_left(buffer, SPECIALITY_WIDTH);
 		speciality = buffer;
 		is >> group >> rating >> attendance;
 		return is;
@@ -260,15 +256,9 @@ public:
 	{
 		//return Human::scan(is) >> speciality >> experience;
 		Human::scan(is);
-		char buffer[SPECIALITY_WIDTH + 1]{};
+		char buffer[SPECIALITY_WIDTH+1]{};
 		is.read(buffer, SPECIALITY_WIDTH);
-		int i = 0;
-		while (buffer[i] == ' ')
-		{
-			for (int j = 0; j < SPECIALITY_WIDTH + 1; j++)
-				buffer[j] = buffer[j + 1];
-			i++;
-		}
+		speciality_left(buffer, SPECIALITY_WIDTH);
 		speciality = buffer;
 		is >> experience;
 		return is;
@@ -329,6 +319,16 @@ void Save(Human** group, const int n, const char filename[])
 	}
 	fout.close();
 	system((std::string("start notepad ") + filename).c_str());
+}
+void speciality_left(char* buffer, const int n)
+{
+	int i = 0;
+	while (buffer[i] == ' ')
+	{
+		for (int j = 0; j < n + 1; j++)
+			buffer[j] = buffer[j + 1];
+		i++;
+	}
 }
 
 Human* HumanFactory(std::string& type)
