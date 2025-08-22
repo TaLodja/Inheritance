@@ -189,6 +189,8 @@ public:
 		//return Human::scan(is) >> speciality >> group >> rating >> attendance;
 		Human::scan(is);
 		char buffer[SPECIALITY_WIDTH + 1]{};
+		while (buffer[0] == ' ') for (int i = 0; buffer[i]; i++) buffer[i] = buffer[i + 1]; //Убираем пробелы сначала
+		//for (char* pch = strrchr(buffer, ' '); *pch == ' '; pch--) *pch = 0;				//Убираем пробелы с конца
 		is.read(buffer, SPECIALITY_WIDTH);
 		speciality_left(buffer, SPECIALITY_WIDTH);
 		speciality = buffer;
@@ -257,6 +259,8 @@ public:
 		//return Human::scan(is) >> speciality >> experience;
 		Human::scan(is);
 		char buffer[SPECIALITY_WIDTH+1]{};
+		while (buffer[0] == ' ') for (int i = 0; buffer[i]; i++) buffer[i] = buffer[i + 1];  
+		//for (char* pch = strrchr(buffer, ' '); *pch == ' '; pch--) *pch = 0;
 		is.read(buffer, SPECIALITY_WIDTH);
 		speciality_left(buffer, SPECIALITY_WIDTH);
 		speciality = buffer;
